@@ -1,0 +1,77 @@
+rails_env = ENV['RAILS_ENV'] || '<%= @app.environment %>'
+rails_root = ENV['RAILS_ROOT'] || '<%= @app.current_dir %>'
+
+worker_processes <%= @app_server[:workers] %>
+working_directory rails_root
+
+# This loads the application in the master process before forking
+# worker processes
+# Read more about it here:
+# http://unicorn.bogomips.org/Unicorn/Configurator.html
+preload_app true
+
+timeout <%= @app_server[:timeout] %>
+
+listen  '<%= @app_server.socket_path %>', :backlog => <%= @app_server[:backlog] %>
+pid     '<%= @app_server.pid_file %>'
+
+# Set the path of the log files inside the log folder of the testapp
+stderr_path '<%= @app_server.stderr_log %>'
+stdout_path '<%= @app_server.stdout_log %>'
+
+before_exec do |server|
+  ENV['BUNDLE_GEMFILE'] = '<%= @app.current_dir %>/Gemfile'
+end
+
+before_fork do |server, worker|
+  ##
+  # When sent a USR2, Unicorn will suffix its pidfile with .oldbin and
+  # immediately start loading up a new version of itself (loaded with a new
+  # version of our app). When this new Unicorn is completely loaded
+  # it will begin spawning workers. The first worker spawned will check to
+  # see if an .oldbin pidfile exists. If so, this means we've just booted up
+  # a new Unicorn and need to tell the old one that it can now die. To do so
+  # we send it a QUIT.
+  #
+  # Using this method we get 0 downtime deploys.
+  old_pid = '<%= @app_server.pid_file %>.oldbin'
+  if File.exists?(old_pid) && server.pid != old_pid
+    begin
+      Process.kill("QUIT", File.read(old_pid).to_i)
+    rescue Errno::ENOENT, Errno::ESRCH
+      # someone else did our job for us
+    end
+  end
+
+  # This option works in together with preload_app true setting
+  # What is does is prevent the master process from holding
+  # the database connection
+  defined?(ActiveRecord::Base) && ActiveRecord::Base.connection.disconnect!
+end
+
+after_fork do |server, worker|
+  # Unicorn master is started as root, which is fine, but let's
+  # drop the workers to www-data:www-data
+  begin
+    uid, gid = Process.euid, Process.egid
+    user, group = '<%= @app_server[:user] %>', '<%= @app_server[:group] %>'
+    target_uid = Etc.getpwnam(user).uid
+    target_gid = Etc.getgrnam(group).gid
+    worker.tmp.chown(target_uid, target_gid)
+    if uid != target_uid || gid != target_gid
+      Process.initgroups(user, target_gid)
+      Process::GID.change_privilege(target_gid)
+      Process::UID.change_privilege(target_uid)
+    end
+  rescue => e
+    if rails_env == 'development'
+      STDERR.puts "couldn't change user, oh well"
+    else
+      raise e
+    end
+  end
+
+  # Here we are establishing the connection after forking worker
+  # processes
+  defined?(ActiveRecord::Base) && ActiveRecord::Base.establish_connection
+end

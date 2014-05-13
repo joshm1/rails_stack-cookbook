@@ -1,0 +1,43 @@
+upstream <%= @app.full_name %> {
+  # This is the socket we configured in the app server
+  server unix:<%= @app.app_server.socket_path %> fail_timeout=0;
+}
+
+server {
+  listen 80;
+  server_name <%= @app.nginx.server_names %>;
+
+  root        <%= @app.current_dir %>/public;
+  access_log  <%= @app.nginx.access_log_path %>;
+  error_log   <%= @app.nginx.error_log_path %>;
+
+  error_page 500 /500.html;
+  error_page 501 /501.html;
+  error_page 502 /502.html;
+  error_page 503 /503.html;
+  error_page 504 /504.html;
+
+  location / {
+    try_files $uri @ruby;
+  }
+
+  location ^~ /assets/ {
+    gzip_static on;
+    expires max;
+    add_header Cache-Control public;
+  }
+
+  location = /favicon.ico {
+    expires max;
+    add_header Cache-Control public;
+  }
+
+  location @ruby {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_connect_timeout 15;
+    proxy_read_timeout 30;
+    proxy_pass http://<%= @app.full_name %>;
+  }
+}

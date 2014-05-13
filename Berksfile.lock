@@ -1,0 +1,62 @@
+DEPENDENCIES
+  apt
+  git
+  logrotate
+  monit
+    git: https://github.com/phlipper/chef-monit
+    revision: 3121b5376205637dda552b437eb153a73d1477ad
+  nginx
+  postgresql
+    git: git@github.com:phlipper/chef-postgresql.git
+    revision: 00db6c2d022e7e72cf2827b0d5f40cb4f3e25943
+  rails_stack
+    path: .
+  redisio
+    git: git@github.com:brianbianco/redisio.git
+    revision: 2b7fc068417fb95758b07bc4f6e3c4a450419812
+
+GRAPH
+  apt (2.3.10)
+  bluepill (2.3.1)
+    rsyslog (>= 0.0.0)
+  build-essential (2.0.2)
+  chef_handler (1.1.6)
+  dmg (2.2.0)
+  git (4.0.2)
+    build-essential (>= 0.0.0)
+    dmg (>= 0.0.0)
+    runit (>= 1.0.0)
+    windows (>= 0.0.0)
+    yum (~> 3.0)
+    yum-epel (>= 0.0.0)
+  logrotate (1.5.0)
+  monit (1.5.2)
+    build-essential (>= 0.0.0)
+  nginx (2.6.2)
+    apt (~> 2.2)
+    bluepill (~> 2.3)
+    build-essential (~> 2.0)
+    ohai (~> 1.1)
+    runit (~> 1.2)
+    yum-epel (~> 0.3)
+  ohai (1.1.12)
+  postgresql (0.13.3)
+    apt (>= 1.9.0)
+  rails_stack (0.1.0)
+    apt (>= 0.0.0)
+    logrotate (>= 0.0.0)
+    monit (>= 0.0.0)
+    nginx (>= 0.0.0)
+  redisio (1.7.1)
+    ulimit (>= 0.1.2)
+  rsyslog (1.12.2)
+  runit (1.5.10)
+    build-essential (>= 0.0.0)
+    yum (~> 3.0)
+    yum-epel (>= 0.0.0)
+  ulimit (0.3.2)
+  windows (1.31.0)
+    chef_handler (>= 0.0.0)
+  yum (3.2.0)
+  yum-epel (0.3.6)
+    yum (~> 3.0)

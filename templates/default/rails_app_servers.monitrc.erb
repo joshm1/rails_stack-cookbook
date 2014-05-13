@@ -1,0 +1,6 @@
+<%- @apps.each do |app| -%>
+check process <%= app.app_server.service_name %>
+    with pidfile "<%= app.app_server.pid_file %>"
+    start program = "<%= app.app_server.init_file %> start"
+    stop  program = "<%= app.app_server.init_file %> stop"
+<%- end -%>

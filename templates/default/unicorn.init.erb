@@ -1,0 +1,125 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          <%= @app_server.service_name %>
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts unicorn for <%= @app.full_name %>
+# Description:       starts unicorn
+### END INIT INFO
+
+DAEMON="/usr/local/bin/bundle"
+DAEMON_OPTS="exec unicorn_rails -c <%= @app_server.config_file %> -E <%= @app.environment %> -D"
+NAME="<%= @app.full_name %>"
+DESC="unicorn_rails for <%= @app.full_name %>"
+PID="<%= @app_server.pid_file %>"
+OLD_PID="$PID.oldbin"
+USER="<%= @app_server[:user] %>"
+TIMEOUT=90
+RAILS_ROOT="<%= @app.current_dir %>"
+
+if [ ! -f $DAEMON ]; then
+  echo "error: executable $DAEMON does not exist" && exit 2
+fi
+
+. /lib/lsb/init-functions
+
+sig () {
+  test -s "$PID" && kill -$1 `cat "$PID"`
+}
+
+run_cmd () {
+  start-stop-daemon --start --chuid $USER -g $USER \
+    --user $USER --name $NAME --exec $DAEMON \
+    --chdir $RAILS_ROOT --pidfile $PID \
+    -- $DAEMON_OPTS
+}
+
+stop_cmd () {
+  start-stop-daemon --stop --chuid $USER -g $USER --signal QUIT \
+    --pidfile $PID --startas $DAEMON -- $DAEMON_OPTS
+}
+
+reload_cmd() {
+  echo "Reloading $DESC: "
+  if test -s $PID; then ORIG_PID=`cat $PID`; else ORIG_PID=0; fi
+
+  echo 'Original PID: ' $ORIG_PID
+
+  if sig USR2; then
+    echo 'USR2 sent; Waiting for .oldbin'
+    n=$TIMEOUT
+
+    #wait for .oldpid to be written
+    while (!(test -s $OLD_PID) && test $n -ge 0); do
+      printf '.' && sleep 1 && n=$(( $n - 1 ))
+    done
+
+    echo 'Waiting for new pid file'
+    #when this loop finishes, should have new pid file
+    while (!(test -s $PID ) || test -s $OLD_PID) && test $n -ge 0; do
+      printf '.' && sleep 1 && n=$(( $n - 1 ))
+    done
+
+    if test -s $PID; then
+      NEW_PID=`cat $PID`
+    else
+      echo 'New master failed to start; see error log'
+      return 1
+    fi
+
+    #timeout has elapsed, verify new pid file exists
+    if [ $ORIG_PID -eq $NEW_PID ]; then
+      echo
+      echo >&2 'New master failed to start; see error log'
+      return 1
+    fi
+
+    echo 'New PID: ' $NEW_PID
+
+    #verify old master QUIT
+    echo
+    if test -s $OLD_PID; then
+      echo >&2 "$OLD_PID still exists after $TIMEOUT seconds"
+      return 1
+    fi
+
+    echo "Reloaded $NAME."
+    return 0
+  fi
+  return 1
+}
+
+case "$1" in
+  start)
+        echo -n "Starting $DESC: "
+        run_cmd
+        echo "$NAME."
+        ;;
+  stop)
+        echo -n "Stopping $DESC: "
+        stop_cmd && echo "$NAME." && exit 0
+        ;;
+  restart)
+        echo -n "Restarting $DESC: "
+        stop_cmd
+        sleep 1
+        run_cmd
+        echo "$NAME."
+        ;;
+  reload)
+        reload_cmd && exit 0
+        echo "Failed..." && $0 start
+        exit $?
+        ;;
+  *)
+        echo "Usage: $NAME {start|stop|restart|reload}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
+
+# vim:ft=sh

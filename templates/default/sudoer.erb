@@ -1,0 +1,8 @@
+Defaults:<%= @app.app_server[:user] %> env_keep+="PATH RAILS_ENV"
+
+<%- if @app[:user] != node[:nginx][:user] -%>
+<%= @app[:user] %> ALL=(<%= node[:nginx][:user] %>) NOPASSWD: ALL
+<%- end -%>
+<%- if @nopasswd_files.size > 0 -%>
+<%= @app[:user] %> ALL=(ALL) NOPASSWD: <%= @nopasswd_files %>
+<%- end -%>

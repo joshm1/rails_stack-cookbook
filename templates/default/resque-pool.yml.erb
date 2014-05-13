@@ -1,0 +1,4 @@
+<%= @app.environment %>:
+<%- @app.resque[:pool].each do |queue, workers| -%>
+  "<%= queue %>": <%= workers %>
+<%- end -%>
