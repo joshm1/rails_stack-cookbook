@@ -1,3 +1,4 @@
+default[:rails_stack][:packages] = %w(git nodejs vim-common)
 default[:rails_stack][:global][:user] = 'apps'
 default[:rails_stack][:global][:user_home] = '/u/apps'
 default[:rails_stack][:global][:group] = 'apps'

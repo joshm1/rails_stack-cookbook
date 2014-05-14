@@ -7,8 +7,10 @@
 # All rights reserved - Do Not Redistribute
 #
 
-package 'git' do
-  action :install
+node[:rails_stack][:packages].each do |pkg|
+  package pkg do
+    action :install
+  end
 end
 
 # Upgrade openssl to latest version
