@@ -2,14 +2,18 @@ module RailsStack
   module Helpers
     def rails_apps
       node[:rails_stack].fetch(:apps, {}).map do |app_name, app|
-        attrs = Chef::Mixin::DeepMerge.deep_merge(global_attributes, app.to_hash)
-        mash = Mash.new(attrs)
-        AppConf.new(node: node, full_name: app_name, app_node: mash)
+        merged_node = merge_app_with_global(app_name)
+        AppConf.new(node: node, full_name: app_name, app_node: merged_node)
       end
     end
 
+    def merge_app_with_global(app_name)
+      node.default[:rails_stack][:apps][app_name] = global_attributes
+      node[:rails_stack][:apps][app_name]
+    end
+
     def global_attributes
-      node.default[:rails_stack][:global]
+      node[:rails_stack][:global]
     end
 
     def app_root_directory(resource)

@@ -18,17 +18,19 @@ rails_apps.each do |app|
     end
   end
 
-  template ::File.join(app.config_dir, 'database.yml') do
-    user app[:user]
-    group app[:group]
-    source 'database.yml.erb'
-    variables({
-      environment: app.environment,
-      db_name: app[:database][:name],
-      username: app[:database][:username],
-      password: app[:database][:password],
-      host: app[:database][:host],
-      adapter: 'postgresql'
-    })
+  if app[:database]
+    template ::File.join(app.config_dir, 'database.yml') do
+      user app[:user]
+      group app[:group]
+      source 'database.yml.erb'
+      variables({
+        environment: app.environment,
+        db_name: app[:database][:name],
+        username: app[:database][:username],
+        password: app[:database][:password],
+        host: app[:database][:host],
+        adapter: 'postgresql'
+      })
+    end
   end
 end
