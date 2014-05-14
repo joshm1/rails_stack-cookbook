@@ -3,7 +3,6 @@ source "http://api.berkshelf.com"
 cookbook 'rails_stack', path: '.'
 
 cookbook 'apt'
-cookbook 'git'
 cookbook 'logrotate'
 cookbook 'monit', git: 'https://github.com/phlipper/chef-monit'
 cookbook 'nginx'
