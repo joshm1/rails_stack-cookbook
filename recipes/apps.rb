@@ -20,6 +20,7 @@ rails_apps.each do |app|
   end
 
   if app[:database]
+    # assumes postgresql currently
     template ::File.join(app.config_dir, 'database.yml') do
       user app[:user]
       group app[:group]
@@ -32,6 +33,10 @@ rails_apps.each do |app|
         host: app[:database][:host],
         adapter: 'postgresql'
       })
+    end
+
+    package 'libpq-dev' do
+      action :install
     end
   end
 end
