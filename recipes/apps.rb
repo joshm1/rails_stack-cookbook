@@ -7,7 +7,8 @@ rails_apps.each do |app|
     app.config_dir,
     app.log_dir,
     app.tmp_dir,
-    app.pids_dir
+    app.pids_dir,
+    app.sockets_dir
   ].each do |dir|
     directory dir do
       owner app[:user]
