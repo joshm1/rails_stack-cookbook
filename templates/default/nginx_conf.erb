@@ -4,7 +4,7 @@ upstream <%= @app.full_name %> {
 }
 
 server {
-  listen 80;
+  listen      <%= @app.nginx[:listen] %>;
   server_name <%= @app.nginx.server_names %>;
 
   root        <%= @app.current_dir %>/public;

@@ -126,16 +126,6 @@ module RailsStack
       :nginx
     end
 
-    def server_names
-      server_names = conf.fetch(:server_names, '_')
-      server_names = server_names.join(' ') if server_names.respond_to?(:join)
-      server_names
-    end
-
-    def log_dir
-      node[:nginx][:log_dir]
-    end
-
     def access_log_path
       conf.fetch(:access_log_path, default_access_log_path)
     end
@@ -155,11 +145,11 @@ module RailsStack
     protected
 
     def default_access_log_path
-      ::File.join(log_dir, "#{full_name}.access.log")
+      ::File.join(conf[:log_dir], "#{full_name}.access.log")
     end
 
     def default_error_log_path
-      ::File.join(log_dir, "#{full_name}.error.log")
+      ::File.join(conf[:log_dir], "#{full_name}.error.log")
     end
   end
 
