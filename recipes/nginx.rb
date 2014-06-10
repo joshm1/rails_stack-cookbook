@@ -3,7 +3,7 @@ include_recipe 'monit'
 
 rails_apps.each do |app|
   nginx = app.nginx
-  cache_root = node[:rails_stack][:nginx][:cache_root]
+  cache_root = nginx[:cache_root]
   cache_store_dir = ::File.join(cache_root, app.full_name)
 
   directory cache_store_dir do

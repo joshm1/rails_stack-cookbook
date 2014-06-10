@@ -5,7 +5,7 @@ upstream <%= @app.full_name %> {
 
 server {
   listen      <%= @app.nginx[:listen] %>;
-  server_name <%= @app.nginx.server_names %>;
+  server_name <%= @app.nginx[:server_names] %>;
 
   root        <%= @app.current_dir %>/public;
   access_log  <%= @app.nginx.access_log_path %>;
