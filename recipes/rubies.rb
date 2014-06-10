@@ -12,7 +12,7 @@ end
 
 # Install required packages
 packages = %w{ libxml2-dev libxslt-dev }
-packages += %w{ ruby2.1 ruby2.1-dev curl ruby-switch } if install_ruby2
+packages += install_ruby2 ? %w{ ruby2.1 ruby2.1-dev curl ruby-switch } : %w{ ruby1.9.1-dev }
 packages.each do |pkg|
   package pkg do
     action :install
