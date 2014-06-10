@@ -1,8 +1,18 @@
 default[:rails_stack][:packages] = %w(git nodejs vim-common)
+default[:rails_stack][:install_ruby2] = true
 default[:rails_stack][:global][:user] = 'apps'
 default[:rails_stack][:global][:user_home] = '/u/apps'
 default[:rails_stack][:global][:group] = 'apps'
-default[:rails_stack][:nginx][:cache_root] = '/mnt/nginx_cache'
+
+default[:rails_stack][:global][:nginx] = {
+  cache_root: '/mnt/nginx_cache',
+  listen: 80,
+  server_names: '_',
+  log_dir: default[:nginx][:log_dir],
+  ssl: {
+    listen: 443
+  }
+}
 
 default[:rails_stack][:global][:resque] = {
   user: default[:rails_stack][:global][:user],
