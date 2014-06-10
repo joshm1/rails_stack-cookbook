@@ -29,7 +29,7 @@ start_cmd () {
   start-stop-daemon --start --pidfile ${pidfile} \
     --chuid ${run_as_user} --chdir ${app_dir} \
     --startas ${bundle} -- exec \
-    resque-pool -d -a ${app_name} \
+    resque-pool -d \
     -c ${config_file} -E ${environment} >> ${stdout_log} 2>&1 || true
   echo "[DONE]"
 }
