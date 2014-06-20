@@ -1,0 +1,7 @@
+<%- @apps.each do |app| -%>
+check process <%= app.resque_web.service_name %>
+    with pidfile "<%= app.resque_web.pid_file %>"
+    start program = "<%= app.resque_web.init_file %> start"
+    stop  program = "<%= app.resque_web.init_file %> stop"
+
+<%- end -%>

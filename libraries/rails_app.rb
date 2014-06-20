@@ -82,11 +82,11 @@ module RailsStack
     end
 
     def pids_dir
-      ::File.join(shared_dir, 'pids')
+      ::File.join(tmp_dir, 'pids')
     end
 
     def sockets_dir
-      ::File.join(shared_dir, 'sockets')
+      ::File.join(tmp_dir, 'sockets')
     end
 
     def nginx
@@ -100,6 +100,10 @@ module RailsStack
 
     def resque
       @resque ||= ResqueConf.new(self)
+    end
+
+    def resque_web
+      @resque_web ||= ResqueWebConf.new(self)
     end
 
     protected
@@ -150,6 +154,40 @@ module RailsStack
 
     def default_error_log_path
       ::File.join(conf[:log_dir], "#{full_name}.error.log")
+    end
+  end
+
+  class ResqueWebConf < NestedConf
+    def service_name
+      "#{full_name}-resque-web"
+    end
+
+    def init_file
+      "/etc/init.d/#{service_name}"
+    end
+
+    def log_files_glob
+      ::File.join(app_conf.log_dir, 'resque-web.*.log')
+    end
+
+    def init_log
+      ::File.join(app_conf.log_dir, 'resque-web.init.log')
+    end
+
+    def stderr_log
+      ::File.join(app_conf.log_dir, 'resque-web.stderr.log')
+    end
+
+    def stdout_log
+      ::File.join(app_conf.log_dir, 'resque-web.stdout.log')
+    end
+
+    def pid_file
+      ::File.join(app_conf.pids_dir, 'resque-web.pid')
+    end
+
+    def conf_key
+      :resque_web
     end
   end
 

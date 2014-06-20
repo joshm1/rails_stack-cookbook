@@ -19,6 +19,12 @@ default[:rails_stack][:global][:resque] = {
   group: default[:rails_stack][:global][:group]
 }
 
+default[:rails_stack][:global][:resque_web] = {
+  user: default[:rails_stack][:global][:resque][:user],
+  port: 5678,
+  load_file: 'config/initializers/resque.rb'
+}
+
 default[:rails_stack][:global][:app_server] = {
   provider: 'unicorn',
   workers: 2,

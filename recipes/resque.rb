@@ -1,3 +1,6 @@
+is_resque_enabled = false
+is_resque_web_enabled = false
+
 rails_apps.each do |app|
   next unless app.resque.pool?
 
@@ -35,11 +38,10 @@ rails_apps.each do |app|
     create "640 #{app.resque[:user]} #{app.resque[:group]}"
   end
 
-  if false #app.resque_web
-    has_resque_web = true
+  if app.resque_web
 
     # create the init script for resque-web
-    template "/etc/init.d/#{app.resque_web[:service]}" do
+    template app.resque_web.init_file do
       source "resque-web.init.erb"
       mode 00770
       owner "root"
@@ -48,30 +50,38 @@ rails_apps.each do |app|
     end
 
     # register resque-web as a service
-    service app.resque_web[:service] do
+    service app.resque_web.service_name do
       provider Chef::Provider::Service::Init::Debian
       supports :start => true, :stop => true, :restart => true
       action :enable
     end
 
     # rotate the resque-web logs
-    logrotate_app app.resque_web[:service] do
+    logrotate_app app.resque_web.service_name do
       cookbook "logrotate"
-      path app.resque_web[:log_file]
+      path app.resque_web.log_files_glob
       options %w(compress missingok delaycompress notifempty)
       frequency "daily"
-      rotate 10
-      create "640 #{app.app_user} #{app.app_group}"
+      rotate 7
+      create "640 #{app.resque[:user]} #{app.resque[:group]}"
     end
+
+    is_resque_web_enabled = true
+  end
+
+  is_resque_enabled = true
+end
+
+if is_resque_enabled
+  monit_monitrc "resque-pool" do
+    notifies :restart, "service[monit]"
+    variables :apps => rails_apps
   end
 end
 
-monit_monitrc "resque-pool" do
-  notifies :restart, "service[monit]"
-  variables :apps => rails_apps
+if is_resque_web_enabled
+  monit_monitrc "resque-web" do
+    notifies :restart, "service[monit]"
+    variables :apps => rails_apps
+  end
 end
-
-#monit_monitrc "resque-web" do
-#  notifies :restart, "service[monit]"
-#  variables({ apps: recipe.apps })
-#end
