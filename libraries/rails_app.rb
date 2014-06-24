@@ -53,6 +53,10 @@ module RailsStack
       app_node.fetch(*args, &block)
     end
 
+    def rails_log
+      ::File.join(log_dir, environment + ".log")
+    end
+
     def project_root_dir
       ::File.join(app_node[:user_home], full_name)
     end
