@@ -9,9 +9,11 @@ default[:rails_stack][:global][:nginx] = {
   listen: 80,
   server_names: '_',
   log_dir: default[:nginx][:log_dir],
+  proxy_read_timeout: 30,
+  proxy_connect_timeout: 10,
   ssl: {
     listen: 443
-  }
+  },
 }
 
 default[:rails_stack][:global][:resque] = {
