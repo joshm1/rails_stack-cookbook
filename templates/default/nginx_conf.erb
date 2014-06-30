@@ -17,7 +17,7 @@ server {
   error_page 503 /503.html;
   error_page 504 /504.html;
 
-
+  client_max_body_size <%= @app.nginx[:client_max_body_size] %>;
 
   location / {
     try_files $uri @ruby;
@@ -43,3 +43,11 @@ server {
     proxy_pass http://<%= @app.full_name %>;
   }
 }
+
+<%- @app.nginx.fetch(:servers, []).each do |server| -%>
+server {
+  <%- server.fetch(:directives, []).each do |directive| -%>
+  <%= directive %>
+  <%- end -%>
+}
+<%- end %>

@@ -11,6 +11,7 @@ default[:rails_stack][:global][:nginx] = {
   log_dir: default[:nginx][:log_dir],
   proxy_read_timeout: 30,
   proxy_connect_timeout: 10,
+  client_max_body_size: '1m',
   ssl: {
     listen: 443
   },
