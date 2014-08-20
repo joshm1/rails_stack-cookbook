@@ -25,9 +25,8 @@ rails_apps.each do |app|
     path app.rails_log
     options %w(compress missingok delaycompress notifempty)
     frequency "daily"
-    rotate 60
-    create "640 #{app_server[:user]} #{app_server[:group]}"
-    postrotate %~kill -USR1 `cat #{app_server.pid_file}`~
+    rotate 30
+    create "640 #{app[:user]} #{app[:group]}"
   end
 
 
