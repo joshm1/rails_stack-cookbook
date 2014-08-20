@@ -19,6 +19,18 @@ rails_apps.each do |app|
     end
   end
 
+  # rotate the rails log file
+  logrotate_app "#{app.full_name}-rails" do
+    cookbook "logrotate"
+    path app.rails_log
+    options %w(compress missingok delaycompress notifempty)
+    frequency "daily"
+    rotate 60
+    create "640 #{app_server[:user]} #{app_server[:group]}"
+    postrotate %~kill -USR1 `cat #{app_server.pid_file}`~
+  end
+
+
   if app[:database]
     # assumes postgresql currently
     template ::File.join(app.config_dir, 'database.yml') do

@@ -12,24 +12,6 @@ rails_apps.each do |app|
     group app_server[:group]
   end
 
-  directory app.log_dir do
-    owner app_server[:user]
-    group "root"
-    mode 00770
-    action :create
-  end
-
-  # rotate the rails log file
-  logrotate_app "#{app.full_name}-rails" do
-    cookbook "logrotate"
-    path app.rails_log
-    options %w(compress missingok delaycompress notifempty)
-    frequency "daily"
-    rotate 60
-    create "640 #{app_server[:user]} #{app_server[:group]}"
-    postrotate %~kill -USR1 `cat #{app_server.pid_file}`~
-  end
-
   # rotate the unicorn stderr and stdout log files
   logrotate_app "#{app.full_name}-#{app_server.name}" do
     cookbook "logrotate"
