@@ -13,7 +13,7 @@ rails_apps.each do |app|
     directory dir do
       owner app[:user]
       group app[:group]
-      mode 0771
+      mode 0751
       recursive true
       action :create
     end
