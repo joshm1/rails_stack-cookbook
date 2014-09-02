@@ -28,6 +28,11 @@ default[:rails_stack][:global][:resque_web] = {
   load_file: 'config/initializers/resque.rb'
 }
 
+default[:rails_stack][:global][:resque_scheduler] = {
+  user: default[:rails_stack][:global][:resque][:user],
+  load_file: default[:rails_stack][:global][:resque_web][:load_file]
+}
+
 default[:rails_stack][:global][:app_server] = {
   provider: 'unicorn',
   workers: 2,

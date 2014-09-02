@@ -11,7 +11,7 @@
 ### END INIT INFO
 
 app_name="<%= @app.full_name %>"
-pidfile="<%= @app.resque_web.pid_file %>"
+pidfile="<%= @app.resque.pid_file %>"
 app_dir="<%= @app.current_dir %>"
 run_as_user="<%= @app.resque[:user] %>"
 sleep_time_during_restart=1

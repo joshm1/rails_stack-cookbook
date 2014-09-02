@@ -16,7 +16,8 @@ run_as_user="<%= @app.resque_web[:user] %>"
 sleep_time_during_restart=2
 stop_schedule="QUIT/30/INT/10/KILL/5"
 environment="<%= @app.environment %>"
-stdout_log="<%= @app.resque_web.init_log %>"
+stdout_log="<%= @app.resque_web.stdout_log %>"
+init_log="<%= @app.resque_web.init_log %>"
 web_port="<%= @app.resque_web[:port] %>"
 bundle="/usr/local/bin/bundle"
 
@@ -29,12 +30,12 @@ fi
 
 case "$1" in
   start)
-    echo -n "** Starting resque-web for ${app_name}... "
-    RAILS_ENV="${environment}" \
+    echo "** Starting resque-web for ${app_name}... "
     start-stop-daemon --start --pidfile ${pidfile} \
       --chuid ${run_as_user} --chdir ${app_dir} \
-      --startas ${bundle} -- exec resque-web -e ${environment} \
-      --port ${web_port} -L "${load_file}" >> ${stdout_log} 2>&1
+      --exec /bin/bash -- -c \
+      "$bundle exec resque-web -e $environment --port $web_port -L $load_file -P $pidfile RAILS_ENV=$environment >> $stdout_log 2>&1" \
+      >> ${init_log} 2>&1
     echo "[DONE]"
     ;;
   stop)

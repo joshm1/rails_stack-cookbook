@@ -1,5 +1,6 @@
 is_resque_enabled = false
 is_resque_web_enabled = false
+is_resque_scheduler_enabled = false
 
 rails_apps.each do |app|
   next unless app.resque.pool?
@@ -36,6 +37,36 @@ rails_apps.each do |app|
     frequency "daily"
     rotate 10
     create "640 #{app.resque[:user]} #{app.resque[:group]}"
+  end
+
+  if app.resque_scheduler.enabled?
+    # create the init script for resque-scheduler
+    template app.resque_scheduler.init_file do
+      source "resque-scheduler.init.erb"
+      mode 00770
+      owner "root"
+      group "root"
+      variables({ app: app })
+    end
+
+    # register resque-scheduler as a service
+    service app.resque_scheduler.service_name do
+      provider Chef::Provider::Service::Init::Debian
+      supports :start => true, :stop => true, :restart => true
+      action :enable
+    end
+
+    # rotate the resque-scheduler logs
+    logrotate_app app.resque_scheduler.service_name do
+      cookbook "logrotate"
+      path app.resque_scheduler.log_files_glob
+      options %w(compress missingok delaycompress notifempty)
+      frequency "daily"
+      rotate 7
+      create "640 #{app.resque[:user]} #{app.resque[:group]}"
+    end
+
+    is_resque_scheduler_enabled = true
   end
 
   if app.resque_web
@@ -81,6 +112,13 @@ end
 
 if is_resque_web_enabled
   monit_monitrc "resque-web" do
+    notifies :restart, "service[monit]"
+    variables :apps => rails_apps
+  end
+end
+
+if is_resque_scheduler_enabled
+  monit_monitrc "resque-scheduler" do
     notifies :restart, "service[monit]"
     variables :apps => rails_apps
   end

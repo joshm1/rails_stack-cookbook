@@ -1,0 +1,57 @@
+#!/bin/sh -e
+
+### BEGIN INIT INFO
+# Provides:          <%= @app.full_name %>-resque-scheduler
+# Required-Start:    $local_fs $remote_fs $network
+# Required-Stop:     $local_fs $remote_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: resque-scheduler init script for <%= @app.full_name %>
+# Description:       resque-scheduler to view resque workers and queues
+### END INIT INFO
+
+pidfile="<%= @app.resque_scheduler.pid_file  %>"
+app_dir="<%= @app.current_dir %>"
+run_as_user="<%= @app.resque_scheduler[:user] %>"
+sleep_time_during_restart=2
+stop_schedule="QUIT/30/INT/10/KILL/5"
+environment="<%= @app.environment %>"
+stdout_log="<%= @app.resque_scheduler.stdout_log %>"
+init_log="<%= @app.resque_scheduler.init_log %>"
+bundle="/usr/local/bin/bundle"
+
+load_file="<%= File.join(@app.current_dir, @app.resque_scheduler[:load_file] || '') %>"
+if [ ! -e "$load_file" ]; then
+  load_file=""
+fi
+
+. /lib/lsb/init-functions
+
+case "$1" in
+  start)
+    echo "** Starting resque-scheduler for ${app_name}."
+    echo "NOTE: this process is forked right away by start-stop-daemon, you will not be notified if it fails"
+    start-stop-daemon --start --make-pidfile --pidfile ${pidfile} \
+      --chuid ${run_as_user} --chdir ${app_dir} --background \
+      --exec /bin/bash -- -c \
+      "${bundle} exec rake environment resque:scheduler RAILS_ENV=${environment} INITIALIZER_FILE=${load_file} >> ${stdout_log} 2>&1" \
+      >> ${init_log} 2>&1
+    echo "[DONE]"
+    ;;
+  stop)
+    echo -n "** Stopping resque-scheduler from pidfile ${pidfile}... "
+    start-stop-daemon --stop --pidfile ${pidfile} --retry=${stop_schedule}
+    echo "[DONE]"
+    ;;
+  restart)
+    $0 stop
+    sleep ${sleep_time_during_restart}
+    $0 start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+# vim: set ft=sh:

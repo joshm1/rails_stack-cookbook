@@ -25,8 +25,12 @@ rails_apps.each do |app|
     path app.rails_log
     options %w(compress missingok delaycompress notifempty)
     frequency "daily"
-    rotate 30
+    rotate 60
     create "640 #{app[:user]} #{app[:group]}"
+    if app.app_server.run? && app.app_server.name == 'unicorn'
+      # unicorn specific signal to rotate log file
+      postrotate %~kill -USR1 `cat #{app.app_server.pid_file}`~
+    end
   end
 
 

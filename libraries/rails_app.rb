@@ -1,10 +1,49 @@
 module RailsStack
+
+  def self.nested_conf(conf_key_value)
+    klass = Class.new(NestedConf)
+    klass.send(:define_method, :conf_key) { conf_key_value }
+    klass
+  end
+
   class NestedConf
     attr_reader :app_conf, :conf
 
     def initialize(app_conf)
       @app_conf = app_conf
       @conf = app_conf.fetch(conf_key, {})
+    end
+
+    def service_name
+      "#{full_name}-#{dashed_name}"
+    end
+
+    def enabled?
+      %w(true yes 1).include?(conf[:enabled].to_s.downcase)
+    end
+
+    def init_file
+      "/etc/init.d/#{service_name}"
+    end
+
+    def log_files_glob
+      ::File.join(app_conf.log_dir, "#{dashed_name}.*.log")
+    end
+
+    def init_log
+      ::File.join(app_conf.log_dir, "#{dashed_name}.init.log")
+    end
+
+    def stderr_log
+      ::File.join(app_conf.log_dir, "#{dashed_name}.stderr.log")
+    end
+
+    def stdout_log
+      ::File.join(app_conf.log_dir, "#{dashed_name}.stdout.log")
+    end
+
+    def pid_file
+      ::File.join(app_conf.pids_dir, "#{dashed_name}.pid")
     end
 
     def node
@@ -21,6 +60,10 @@ module RailsStack
 
     def full_name
       app_conf.full_name
+    end
+
+    def dashed_name
+      conf_key.to_s.gsub(/[_\W]+/, '-')
     end
 
     def conf_key
@@ -110,6 +153,10 @@ module RailsStack
       @resque_web ||= ResqueWebConf.new(self)
     end
 
+    def resque_scheduler
+      @resque_scheduler ||= ResqueSchedulerConf.new(self)
+    end
+
     protected
 
     def derived_name
@@ -161,77 +208,30 @@ module RailsStack
     end
   end
 
-  class ResqueWebConf < NestedConf
-    def service_name
-      "#{full_name}-resque-web"
-    end
-
-    def init_file
-      "/etc/init.d/#{service_name}"
-    end
-
-    def log_files_glob
-      ::File.join(app_conf.log_dir, 'resque-web.*.log')
-    end
-
-    def init_log
-      ::File.join(app_conf.log_dir, 'resque-web.init.log')
-    end
-
-    def stderr_log
-      ::File.join(app_conf.log_dir, 'resque-web.stderr.log')
-    end
-
-    def stdout_log
-      ::File.join(app_conf.log_dir, 'resque-web.stdout.log')
-    end
-
-    def pid_file
-      ::File.join(app_conf.pids_dir, 'resque-web.pid')
-    end
-
-    def conf_key
-      :resque_web
-    end
-  end
-
   class ResqueConf < NestedConf
     def service_name
       "#{full_name}-resque"
-    end
-
-    def init_file
-      "/etc/init.d/#{service_name}"
     end
 
     def config_file
       ::File.join(app_conf.config_dir, 'resque-pool.yml')
     end
 
-    def init_log
-      ::File.join(app_conf.log_dir, 'resque-pool.init.log')
-    end
-
-    def stderr_log
-      ::File.join(app_conf.log_dir, 'resque-pool.stderr.log')
-    end
-
-    def stdout_log
-      ::File.join(app_conf.log_dir, 'resque-pool.stdout.log')
-    end
-
-    def pid_file
-      ::File.join(app_conf.pids_dir, 'resque-pool.pid')
-    end
-
     def pool?
       conf[:pool] && conf[:pool].size > 0
+    end
+
+    def dashed_name
+      'resque-pool'
     end
 
     def conf_key
       :resque
     end
   end
+
+  ResqueWebConf = nested_conf(:resque_web)
+  ResqueSchedulerConf = nested_conf(:resque_scheduler)
 
   module AppServers
     def self.by_name(name)
@@ -268,10 +268,6 @@ module RailsStack
 
       def service_name
         "#{full_name}-#{name}"
-      end
-
-      def init_file
-        "/etc/init.d/#{service_name}"
       end
 
       def conf_key
