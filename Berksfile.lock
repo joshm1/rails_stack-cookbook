@@ -1,9 +1,10 @@
 DEPENDENCIES
   apt
+  java
   logrotate
   monit
     git: https://github.com/phlipper/chef-monit
-    revision: 3121b5376205637dda552b437eb153a73d1477ad
+    revision: 9aecee976641ad2f9b3b3c1924d6ce97b8a17216
   nginx
   postgresql
     git: git@github.com:phlipper/chef-postgresql.git
@@ -19,8 +20,9 @@ GRAPH
   bluepill (2.3.1)
     rsyslog (>= 0.0.0)
   build-essential (2.0.2)
+  java (1.28.0)
   logrotate (1.5.0)
-  monit (1.5.2)
+  monit (1.5.4)
     build-essential (>= 0.0.0)
   nginx (2.6.2)
     apt (~> 2.2)
@@ -32,7 +34,7 @@ GRAPH
   ohai (1.1.12)
   postgresql (0.13.3)
     apt (>= 1.9.0)
-  rails_stack (0.1.6)
+  rails_stack (0.1.9)
     apt (>= 0.0.0)
     logrotate (>= 0.0.0)
     monit (>= 0.0.0)
