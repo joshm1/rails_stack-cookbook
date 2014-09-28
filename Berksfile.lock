@@ -34,7 +34,7 @@ GRAPH
   ohai (1.1.12)
   postgresql (0.13.3)
     apt (>= 1.9.0)
-  rails_stack (0.1.9)
+  rails_stack (0.1.10)
     apt (>= 0.0.0)
     logrotate (>= 0.0.0)
     monit (>= 0.0.0)

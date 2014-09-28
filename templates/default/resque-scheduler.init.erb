@@ -40,7 +40,7 @@ case "$1" in
     ;;
   stop)
     echo -n "** Stopping resque-scheduler from pidfile ${pidfile}... "
-    start-stop-daemon --stop --pidfile ${pidfile} --retry=${stop_schedule}
+    pkill -TERM -P `cat ${pidfile}` # start-stop-daemon does not kill child processes
     echo "[DONE]"
     ;;
   restart)
