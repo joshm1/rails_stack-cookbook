@@ -9,3 +9,5 @@ cookbook 'nginx'
 cookbook 'postgresql', git: 'git@github.com:phlipper/chef-postgresql.git'
 cookbook 'redisio', git: 'git@github.com:brianbianco/redisio.git'
 cookbook 'java'
+
+cookbook 'logentries', git: 'https://github.com/jagregory/chef-logentries'

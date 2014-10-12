@@ -1,6 +1,9 @@
 DEPENDENCIES
   apt
   java
+  logentries
+    git: https://github.com/jagregory/chef-logentries
+    revision: caafcedfe89e38559660214cd0d56da17564ae4c
   logrotate
   monit
     git: https://github.com/phlipper/chef-monit
@@ -21,6 +24,9 @@ GRAPH
     rsyslog (>= 0.0.0)
   build-essential (2.0.2)
   java (1.28.0)
+  logentries (0.1.4)
+    apt (>= 0.0.0)
+    yum (>= 0.0.0)
   logrotate (1.5.0)
   monit (1.5.4)
     build-essential (>= 0.0.0)
@@ -34,7 +40,7 @@ GRAPH
   ohai (1.1.12)
   postgresql (0.13.3)
     apt (>= 1.9.0)
-  rails_stack (0.1.10)
+  rails_stack (0.1.11)
     apt (>= 0.0.0)
     logrotate (>= 0.0.0)
     monit (>= 0.0.0)

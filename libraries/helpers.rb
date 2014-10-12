@@ -1,5 +1,9 @@
 module RailsStack
   module Helpers
+    def enable_logentries?
+      !!node[:logentries]
+    end
+
     def rails_apps
       node[:rails_stack].fetch(:apps, {}).map do |app_name, app|
         merged_node = merge_app_with_global(app_name)

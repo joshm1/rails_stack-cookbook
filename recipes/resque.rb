@@ -4,6 +4,7 @@ is_resque_scheduler_enabled = false
 
 rails_apps.each do |app|
   next unless app.resque.pool?
+  logentries_logs = {}
 
   # create the resque-pool config file
   template app.resque.config_file do
@@ -37,7 +38,14 @@ rails_apps.each do |app|
     frequency "daily"
     rotate 10
     create "640 #{app.resque[:user]} #{app.resque[:group]}"
+    postrotate %~kill -HUP `cat #{app.resque.pid_file}`~
   end
+
+  logentries_logs.merge!(
+    'resque:stdout' => app.resque.stdout_log,
+    'resque:stderr' => app.resque.stderr_log,
+    'resque:init' => app.resque.init_log,
+  )
 
   if app.resque_scheduler.enabled?
     # create the init script for resque-scheduler
@@ -65,6 +73,12 @@ rails_apps.each do |app|
       rotate 7
       create "640 #{app.resque[:user]} #{app.resque[:group]}"
     end
+
+    logentries_logs.merge!(
+      'resque-sch:stdout' => app.resque_scheduler.stdout_log,
+      'resque-sch:stderr' => app.resque_scheduler.stderr_log,
+      'resque-sch:init' => app.resque_scheduler.init_log
+    )
 
     is_resque_scheduler_enabled = true
   end
@@ -101,6 +115,13 @@ rails_apps.each do |app|
   end
 
   is_resque_enabled = true
+
+  logentries_logs.each do |name, path|
+    logentries path do
+      log_name app.short_name + ':' + name
+      action :follow
+    end
+  end
 end
 
 if is_resque_enabled

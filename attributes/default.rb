@@ -41,3 +41,10 @@ default[:rails_stack][:global][:app_server] = {
   user: default[:rails_stack][:global][:user],
   group: default[:rails_stack][:global][:group]
 }
+
+default[:logentries][:server_name] = name
+default[:logentries][:log_files] = {
+  'syslog' => '/var/log/syslog',
+  'auth' => '/var/log/auth.log',
+  'monit' => '/var/log/monit.log'
+}

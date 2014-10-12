@@ -17,3 +17,8 @@ end
 package 'openssl' do
   action :upgrade
 end
+
+if enable_logentries?
+  # we need this recipe to run before any logs are added
+  include_recipe 'logentries'
+end

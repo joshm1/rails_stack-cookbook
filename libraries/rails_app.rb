@@ -84,6 +84,10 @@ module RailsStack
       @name ||= app_node[:name] || derived_name
     end
 
+    def short_name
+      (full_name.split('_')[0..-2] << full_name.split('_')[-1][0]).join('_')
+    end
+
     def environment
       @environment ||= app_node[:environment] || derived_environment
     end
@@ -98,6 +102,10 @@ module RailsStack
 
     def rails_log
       ::File.join(log_dir, environment + ".log")
+    end
+
+    def enable_logentries?
+      !!node[:logentries] # TODO app-specific conf to disable logentries
     end
 
     def project_root_dir

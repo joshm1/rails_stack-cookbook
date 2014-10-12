@@ -33,6 +33,17 @@ rails_apps.each do |app|
     end
   end
 
+  if app.enable_logentries?
+    logentries app.rails_log do
+      log_name app.short_name + ':rails'
+      action :follow
+    end
+
+    logentries ::File.join(app.log_dir, 'cron.log') do
+      log_name app.short_name + ':' + 'cron'
+      action :follow
+    end
+  end
 
   if app[:database]
     # assumes postgresql currently

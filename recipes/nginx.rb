@@ -51,3 +51,25 @@ end
 monit_monitrc "nginx" do
   notifies :restart, "service[monit]"
 end
+
+# TODO only add this if logentries is setup on this node
+if enable_logentries?
+  nginx_logs = {
+    'nginx:access' => '/var/log/nginx/access.log',
+    'nginx:error' => '/var/log/nginx/error.log'
+  }
+
+  rails_apps.each do |app|
+    if app.enable_logentries?
+      nginx_logs[app.short_name + ':nginx:access'] = app.nginx.access_log_path
+      nginx_logs[app.short_name + ':nginx:error'] = app.nginx.error_log_path
+    end
+  end
+
+  nginx_logs.each do |name, path|
+    logentries path do
+      log_name name
+      action :follow
+    end
+  end
+end

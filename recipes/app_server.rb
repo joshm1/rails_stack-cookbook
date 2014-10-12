@@ -31,6 +31,18 @@ rails_apps.each do |app|
     postrotate %~kill -USR1 `cat #{app_server.pid_file}`~
   end
 
+  if app.enable_logentries?
+    logentries app_server.stdout_log do
+      log_name app.short_name + ':unicorn:stdout'
+      action :follow
+    end
+
+    logentries app_server.stderr_log do
+      log_name app.short_name + ':unicorn:stderr'
+      action :follow
+    end
+  end
+
   # create unicorn init file
   template app_server.init_file do
     variables :app => app, :app_server => app_server
