@@ -36,7 +36,7 @@ before_fork do |server, worker|
   old_pid = '<%= @app_server.pid_file %>.oldbin'
   if File.exists?(old_pid) && server.pid != old_pid
     begin
-      sleep(5) if worker.nr > 1
+      sleep(10) if worker.nr > 1
       sig = (worker.nr + 1) >= server.worker_processes ? :QUIT : :TTOU
       puts "Worker: #{worker.nr} is sending #{sig} signal to old unicorn master..."
       Process.kill(sig, File.read(old_pid).to_i)
