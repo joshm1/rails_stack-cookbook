@@ -28,16 +28,18 @@ before_fork do |server, worker|
   # When sent a USR2, Unicorn will suffix its pidfile with .oldbin and
   # immediately start loading up a new version of itself (loaded with a new
   # version of our app). When this new Unicorn is completely loaded
-  # it will begin spawning workers. The first worker spawned will check to
-  # see if an .oldbin pidfile exists. If so, this means we've just booted up
-  # a new Unicorn and need to tell the old one that it can now die. To do so
-  # we send it a QUIT.
+  # it will begin spawning workers. Each new worker spawned will remove an old one.
+  # With the last worker spawned sending a QUIT command removing the last old worker
+  # and original master
   #
   # Using this method we get 0 downtime deploys.
-  old_pid = '<%= @app_server.pid_file %>.oldbin'
+  old_pid = '<%= @unicorn.pid_file %>.oldbin'
   if File.exists?(old_pid) && server.pid != old_pid
     begin
-      Process.kill("QUIT", File.read(old_pid).to_i)
+      sleep(5) if worker.nr > 1
+      sig = (worker.nr + 1) >= server.worker_processes ? :QUIT : :TTOU
+      puts "Worker: #{worker.nr} is sending #{sig} signal to old unicorn master..."
+      Process.kill(sig, File.read(old_pid).to_i)
     rescue Errno::ENOENT, Errno::ESRCH
       # someone else did our job for us
     end
