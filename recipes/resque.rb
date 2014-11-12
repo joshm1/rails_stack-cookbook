@@ -34,10 +34,9 @@ rails_apps.each do |app|
   logrotate_app app.resque.service_name do
     cookbook "logrotate"
     path [ app.resque.stdout_log, app.resque.stderr_log, app.resque.init_log ]
-    options %w(compress missingok delaycompress notifempty)
+    options %w(compress missingok delaycompress notifempty copytruncate)
     frequency "daily"
     rotate 14
-    copytruncate
     postrotate %~kill -HUP `cat #{app.resque.pid_file}`~
   end
 
@@ -68,10 +67,9 @@ rails_apps.each do |app|
     logrotate_app app.resque_scheduler.service_name do
       cookbook "logrotate"
       path app.resque_scheduler.log_files_glob
-      options %w(compress missingok delaycompress notifempty)
+      options %w(compress missingok delaycompress notifempty copytruncate)
       frequency "daily"
       rotate 14
-      copytruncate
     end
 
     logentries_logs.merge!(
@@ -105,10 +103,9 @@ rails_apps.each do |app|
     logrotate_app app.resque_web.service_name do
       cookbook "logrotate"
       path app.resque_web.log_files_glob
-      options %w(compress missingok delaycompress notifempty)
+      options %w(compress missingok delaycompress notifempty copytruncate)
       frequency "daily"
       rotate 14
-      copytruncate
     end
 
     is_resque_web_enabled = true

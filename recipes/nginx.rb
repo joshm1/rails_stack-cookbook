@@ -15,12 +15,21 @@ rails_apps.each do |app|
 
   template "nginx_#{app.full_name}" do
     variables({ app: app })
-    source 'nginx_conf.erb'
+    source 'nginx/site.erb'
     path nginx.available_file
     mode 00660
     owner node[:nginx][:user]
     group node[:nginx][:group]
     backup 5
+    action :create
+  end
+
+  template "nginx_global_conf" do
+    source 'nginx/global.conf.erb'
+    path '/etc/nginx/conf.d/global.conf'
+    mode 00660
+    owner node[:nginx][:user]
+    group node[:nginx][:group]
     action :create
   end
 
@@ -52,7 +61,6 @@ monit_monitrc "nginx" do
   notifies :restart, "service[monit]"
 end
 
-# TODO only add this if logentries is setup on this node
 if enable_logentries?
   nginx_logs = {
     'nginx:access' => '/var/log/nginx/access.log',
