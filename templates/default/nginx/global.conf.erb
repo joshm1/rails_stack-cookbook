@@ -1,0 +1,17 @@
+log_format le_json '{ "time":"$time_iso8601", '
+  '"remote_addr":"$remote_addr", '
+  '"body_bytes_sent":$body_bytes_sent, '
+  '"request_time":$request_time, '
+  '"status":$status, '
+  '"host":"$host", '
+  '"request":"$request", '
+  '"request_method":"$request_method", '
+  '"http_referrer":"$http_referer", '
+  '"http_user_agent":"$http_user_agent" }';
+
+# protect dotfiles
+location ~ /\. { deny all; error_log off; log_not_found off; }
+#
+# # ignore common 404s
+location = /robots.txt  { access_log off; log_not_found off; }
+location = /favicon.ico { access_log off; log_not_found off; }
