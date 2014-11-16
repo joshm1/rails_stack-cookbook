@@ -189,6 +189,11 @@ module RailsStack
       :nginx
     end
 
+    def cache_path
+      cache_root = conf[:cache_root]
+      ::File.join(cache_root, full_name)
+    end
+
     def access_log_path
       conf.fetch(:access_log_path, default_access_log_path)
     end

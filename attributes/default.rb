@@ -5,7 +5,12 @@ default[:rails_stack][:global][:user_home] = '/u/apps'
 default[:rails_stack][:global][:group] = 'apps'
 
 default[:rails_stack][:global][:nginx] = {
-  cache_root: '/mnt/nginx_cache',
+  template_file: 'nginx/site.erb',
+  cache_root: '/var/cache/nginx',
+  cache_inactive: '20m',
+  cache_loader_threshold: '200',
+  cache_loader_files: '300',
+  cache_max_size: '200m',
   listen: 80,
   server_names: '_',
   log_dir: default[:nginx][:log_dir],

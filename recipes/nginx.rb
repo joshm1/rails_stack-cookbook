@@ -3,10 +3,8 @@ include_recipe 'monit'
 
 rails_apps.each do |app|
   nginx = app.nginx
-  cache_root = nginx[:cache_root]
-  cache_store_dir = ::File.join(cache_root, app.full_name)
 
-  directory cache_store_dir do
+  directory nginx.cache_path do
     recursive true
     user node[:nginx][:user]
     group node[:nginx][:group]
@@ -15,7 +13,7 @@ rails_apps.each do |app|
 
   template "nginx_#{app.full_name}" do
     variables({ app: app })
-    source 'nginx/site.erb'
+    source app.nginx[:template_file]
     path nginx.available_file
     mode 00660
     owner node[:nginx][:user]
