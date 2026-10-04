@@ -1,3 +1,5 @@
+> **Archived 2026-10-04.** No longer maintained.
+
 rails_stack Cookbook
 ====================
 TODO: Enter the cookbook description here.
